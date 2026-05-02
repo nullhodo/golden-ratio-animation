@@ -1,4 +1,4 @@
-# Exact Golden Spiral Animation
+# Golden Ratio Animation
 
 ## 概要
 
