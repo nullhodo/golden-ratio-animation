@@ -400,14 +400,31 @@ export function drawState2(
     const baseTextColor = graphicsContext.color(appState.textColor);
 
     if (progressValue < 0.5) {
+        const tw1 = graphicsContext.textWidth('1');
+        const tw2 = graphicsContext.textWidth('.618');
+        const totalW = tw1 + tw2;
+        const startX1 = -totalW / 2 + tw1 / 2;
+        const startX2 = totalW / 2 - tw2 / 2;
+
+        const currX1 = graphicsContext.lerp(startX1, squarePositionX, lineProgress);
+        const currX2 = graphicsContext.lerp(startX2, rightRectX, lineProgress);
+
         const oldAlpha = 1.0 - lineProgress;
         if (oldAlpha > 0.001) {
             const oldColor = graphicsContext.color(appState.textColor);
             oldColor.setAlpha(255 * oldAlpha);
             drawLabelText(
                 graphicsContext,
-                '1.618',
-                0,
+                '1',
+                currX1,
+                -hHalf - marginY,
+                oldColor,
+                0
+            );
+            drawLabelText(
+                graphicsContext,
+                '.618',
+                currX2,
                 -hHalf - marginY,
                 oldColor,
                 0
@@ -430,8 +447,8 @@ export function drawState2(
             drawLabelText(
                 graphicsContext,
                 '1.000',
-                squarePositionX,
-                -squareSize / 2 - marginY,
+                currX1,
+                -hHalf - marginY,
                 newColor,
                 0
             );
@@ -439,11 +456,12 @@ export function drawState2(
             drawLabelText(
                 graphicsContext,
                 '0.618',
-                rightRectX,
+                currX2,
                 -hHalf - marginY,
                 newColor,
                 0
             );
+
             drawLabelText(
                 graphicsContext,
                 '1.000',
