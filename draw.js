@@ -289,7 +289,12 @@ export function drawState1(graphicsContext, rectWidth, rectHeight) {
     graphicsContext.pop();
 }
 
-export function drawState2(graphicsContext, rectWidth, rectHeight, progressValue) {
+export function drawState2(
+    graphicsContext,
+    rectWidth,
+    rectHeight,
+    progressValue
+) {
     const squareSize = rectHeight;
     const rightRectangleWidth = rectWidth - squareSize;
 
@@ -409,6 +414,15 @@ export function drawState2(graphicsContext, rectWidth, rectHeight, progressValue
             );
         }
 
+        drawLabelText(
+            graphicsContext,
+            '1.000',
+            squarePositionX - squareSize / 2 - marginX,
+            0,
+            baseTextColor,
+            0
+        );
+
         if (lineProgress > 0.001) {
             const newColor = graphicsContext.color(appState.textColor);
             newColor.setAlpha(255 * lineProgress);
@@ -421,14 +435,7 @@ export function drawState2(graphicsContext, rectWidth, rectHeight, progressValue
                 newColor,
                 0
             );
-            drawLabelText(
-                graphicsContext,
-                '1.000',
-                squarePositionX - squareSize / 2 - marginX,
-                0,
-                newColor,
-                0
-            );
+
             drawLabelText(
                 graphicsContext,
                 '0.618',
@@ -487,7 +494,12 @@ export function drawState2(graphicsContext, rectWidth, rectHeight, progressValue
     }
 }
 
-export function drawState3(graphicsContext, rectWidth, rectHeight, progressValue) {
+export function drawState3(
+    graphicsContext,
+    rectWidth,
+    rectHeight,
+    progressValue
+) {
     const rightRectangleWidth = rectWidth - rectHeight;
     const rightRectanglePositionX = rectWidth / 2 - rightRectangleWidth / 2;
 
@@ -576,7 +588,11 @@ export function drawState3(graphicsContext, rectWidth, rectHeight, progressValue
     graphicsContext.pop();
 }
 
-export function drawDebugInformation(graphicsContext, targetWidth, targetHeight) {
+export function drawDebugInformation(
+    graphicsContext,
+    targetWidth,
+    targetHeight
+) {
     graphicsContext.push();
     graphicsContext.fill(255);
     graphicsContext.noStroke();
@@ -594,4 +610,3 @@ export function drawDebugInformation(graphicsContext, targetWidth, targetHeight)
     graphicsContext.text(debugText, 20, 20);
     graphicsContext.pop();
 }
-
