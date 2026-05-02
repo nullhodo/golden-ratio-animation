@@ -362,9 +362,9 @@ export function drawState2(
 
         if (fadeOutAlpha > 0.001) {
             const sqFill = graphicsContext.color(appState.rectangleColor);
-            sqFill.setAlpha(255 * fadeOutAlpha);
+            sqFill.setAlpha(graphicsContext.alpha(sqFill) * fadeOutAlpha);
             const sqStroke = graphicsContext.color(appState.lineColor);
-            sqStroke.setAlpha(255 * fadeOutAlpha);
+            sqStroke.setAlpha(graphicsContext.alpha(sqStroke) * fadeOutAlpha);
 
             graphicsContext.fill(sqFill);
             graphicsContext.noStroke();
