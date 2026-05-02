@@ -73,32 +73,66 @@ export function startVideoRecording() {
 
     recordingState.chunks = [];
 
-    const canvasElement = document.querySelector('canvas');
-    const videoStream = canvasElement.captureStream(60);
+    // p5.jsが生成するキャンバスを明示的に取得する（TweakpaneのCanvasと混同しないため）
+    const canvasElement =
+        document.querySelector('canvas.p5Canvas') ||
+        document.querySelector('#defaultCanvas0');
+    console.log('[REC] canvas found:', canvasElement);
+    console.log('[REC] canvas size:', canvasElement.width, 'x', canvasElement.height);
 
-    const recorderOptions = {
-        mimeType: 'video/webm; codecs=vp9',
-        videoBitsPerSecond: 10000000,
-    };
+    const videoStream = canvasElement.captureStream(60);
+    console.log('[REC] stream tracks:', videoStream.getTracks());
+
+    // サポートされているmimeTypeを探す
+    const candidates = [
+        'video/webm; codecs=vp9',
+        'video/webm; codecs=vp8',
+        'video/webm',
+    ];
+    let selectedMime = '';
+    for (const mime of candidates) {
+        if (MediaRecorder.isTypeSupported(mime)) {
+            selectedMime = mime;
+            break;
+        }
+    }
+    console.log('[REC] selected mimeType:', selectedMime || '(browser default)');
+
+    const recorderOptions = selectedMime
+        ? { mimeType: selectedMime, videoBitsPerSecond: 10_000_000 }
+        : { videoBitsPerSecond: 10_000_000 };
 
     try {
         recordingState.recorder = new MediaRecorder(videoStream, recorderOptions);
     } catch (error) {
-        console.warn(
-            'vp9 codec not supported, falling back to default.',
-            error
-        );
+        console.warn('[REC] MediaRecorder init failed, using bare defaults:', error);
         recordingState.recorder = new MediaRecorder(videoStream);
     }
 
+    console.log('[REC] recorder state after init:', recordingState.recorder.state);
+    console.log('[REC] recorder mimeType:', recordingState.recorder.mimeType);
+
     recordingState.recorder.ondataavailable = (eventObject) => {
+        console.log('[REC] ondataavailable fired, data.size:', eventObject.data?.size);
         if (eventObject.data && eventObject.data.size > 0) {
             recordingState.chunks.push(eventObject.data);
+            console.log('[REC] chunk pushed, total chunks:', recordingState.chunks.length);
         }
     };
 
+    recordingState.recorder.onerror = (e) => {
+        console.error('[REC] recorder error:', e);
+    };
+
     recordingState.recorder.onstop = () => {
-        const videoBlob = new Blob(recordingState.chunks, { type: 'video/webm' });
+        console.log('[REC] recorder stopped, total chunks:', recordingState.chunks.length);
+        const totalBytes = recordingState.chunks.reduce((sum, c) => sum + c.size, 0);
+        console.log('[REC] total data bytes:', totalBytes);
+
+        const blobMime = recordingState.recorder.mimeType || 'video/webm';
+        const videoBlob = new Blob(recordingState.chunks, { type: blobMime });
+        console.log('[REC] blob size:', videoBlob.size, 'type:', videoBlob.type);
+
         const objectUrl = URL.createObjectURL(videoBlob);
 
         const timestampString = getFormattedDate();
@@ -120,7 +154,10 @@ export function startVideoRecording() {
         document.getElementById('recording-indicator').style.display = 'none';
     };
 
-    recordingState.recorder.start();
+    // 100ms ごとにデータを強制収集
+    recordingState.recorder.start(100);
+    console.log('[REC] recorder.start(100) called, state:', recordingState.recorder.state);
+
     recordingState.isActive = true;
     recordingState.startTimestamp = millis();
 
@@ -129,6 +166,7 @@ export function startVideoRecording() {
 
 export function stopVideoRecording() {
     if (!recordingState.isActive) return;
+    console.log('[REC] stop called, chunks so far:', recordingState.chunks.length);
     recordingState.recorder.stop();
     recordingState.isActive = false;
 }
